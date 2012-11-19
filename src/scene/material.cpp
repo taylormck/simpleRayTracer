@@ -39,9 +39,9 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// 		.
 	// 		.
 	// }
-	
+	Vec3d color = kd(i);
 
-	return kd(i);
+	return color;
 
 }
 
