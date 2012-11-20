@@ -26,22 +26,30 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	if( debugMode )
 		std::cout << "Debugging Phong code..." << std::endl;
 
-	// When you're iterating through the lights,
-	// you'll want to use code that looks something
-	// like this:
-	//
-	// for ( vector<Light*>::const_iterator litr = scene->beginLights(); 
-	// 		litr != scene->endLights(); 
-	// 		++litr )
-	// {
-	// 		Light* pLight = *litr;
-	// 		.
-	// 		.
-	// 		.
-	// }
-	Vec3d color = kd(i);
+	Vec3d diff_color = kd(i);
 
-	return color;
+	//  Set up a few vectors (and a double) to be reused for each light
+	Vec3d final_color = scene->ambient();
+	Vec3d light_color;
+	Vec3d light_dir;
+	double diff_co;
+
+	// Loop through the lights and add their contribution
+	for (vector<Light*>::const_iterator litr = scene->beginLights();
+	     litr != scene->endLights(); ++litr) {
+	  Light* pLight = *litr;
+	  light_color = pLight->getColor(diff_color);
+	  light_dir = pLight->getDirection(diff_color);
+
+	  diff_co = light_dir * i.N;
+	  light_color *= diff_co;
+
+	  final_color += Vec3d(diff_color[0] * light_color[0],
+	                         diff_color[1] * light_color[1],
+	                         diff_color[2] * light_color[2]);
+	}
+
+	return final_color;
 
 }
 
