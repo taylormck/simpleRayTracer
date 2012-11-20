@@ -77,43 +77,26 @@ Vec3d RayTracer::traceRay( const ray& r, const Vec3d& thresh, int depth )
       // TODO Get refaction vector and trace it, multiply the color
       Vec3d mat_refract = m.kt(i);
       if (!mat_refract.iszero()) {
-//        double rindex = 0;
-//        Vec3d N = normal;
-//        if (dot > 0)
-//         rindex = 1.0 / m.index(i);
-//        else if (dot < 0) {
-//          rindex = m.index(i);
-//          N *= -1;
-//        }
-//
-//        double sin_refraction_angle = rindex * rindex * (1.0 - dot * dot);
-//        if (sin_refraction_angle <= 1.0) {
-//
-//          Vec3d refraction_dir = rindex * dir - (rindex * dot + sqrt(1.0 - sin_refraction_angle)) * N;
-//          ray refract_ray(new_pos, refraction_dir);
-//          Vec3d refract_color = traceRay(refract_ray, thresh, depth + 1);
-//
-//          if (debugMode) {
-//            std::cout << "index: " << rindex << ", dir: " << refraction_dir << ", color: " << refract_color << ", mat: " << mat_refract << endl;
-//          }
-//
-//          final_color += prod(mat_refract, refract_color);
-//        }
-        double n = 1.0 / m.index(i);
-        Vec3d N = normal;
-        if (dot == 0)
-          N = Vec3d(0);
-        else if (dot < 0)
-          N *= -1;
+        double n = m.index(i);
+        if (dot != 0) {
+          Vec3d N = normal;
+          // Reverse if we're going into the material
+          if (dot > 0) {
+            N *= -1.0;
+            n = 1.0 / n;
+          }
 
-        float cosI = -1.0 * N * dir;
-        float cosT2 = 1.0 - n*n * (1.0 - cosI*cosI);
-        if (cosT2 > 0) {
-          Vec3d T = (n * dir) + (n * cosI - sqrt(cosT2)) * N;
-          ray refract_ray(new_pos, T);
-          Vec3d refract_color = traceRay(refract_ray, thresh, depth + 1);
+          // Calculate cosines according to the angle
+          float cos_i = N * dir;
+          double cos_t2 = 1.0 - n*n * (1.0 - cos_i*cos_i);
+          if (cos_t2 >= 0) {
+            double cos_t = sqrt(cos_t2);
+            Vec3d T = (n * cos_i - cos_t) * N - n * dir;
+            ray refract_ray(new_pos, T);
+            Vec3d refract_color = traceRay(refract_ray, thresh, depth + 1);
 
-          final_color += prod(mat_refract, refract_color);
+            final_color += prod(mat_refract, refract_color);
+          }
         }
       }
     }
