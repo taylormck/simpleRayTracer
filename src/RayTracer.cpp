@@ -51,7 +51,7 @@ Vec3d RayTracer::traceRay( const ray& r, const Vec3d& thresh, int depth )
 
   if( scene->intersect( r, i ) ) {
     const Material& m = i.getMaterial();
-    Vec3d final_color = m.shade(scene, r, i);
+    Vec3d final_color = m.shade(scene, r, i);  // Get our objects normal color
 
     // Get reflected and refracted color by tracing new rays
     if (depth < traceUI->getDepth()) {
@@ -87,7 +87,7 @@ Vec3d RayTracer::traceRay( const ray& r, const Vec3d& thresh, int depth )
           }
 
           // Calculate cosines according to the angle
-          float cos_i = normal_i * dir;
+          double cos_i = normal_i * dir;
           double cos_t2 = 1.0 - refraction_index*refraction_index * (1.0 - cos_i*cos_i);
 
           // Make sure we have a valid transmission angle
