@@ -68,31 +68,33 @@ Vec3d RayTracer::traceRay( const ray& r, const Vec3d& thresh, int depth )
 
       if (!mat_reflect.iszero()) {
         Vec3d reflect_dir = -2.0 * dot * normal + dir;
-        ray reflect_ray(new_pos, reflect_dir);
+        ray reflect_ray(new_pos, reflect_dir, ray::REFLECTION);
 
         Vec3d reflect_color = traceRay(reflect_ray, thresh, depth + 1);
         final_color += prod(mat_reflect, reflect_color);
       }
 
-      // TODO Get refaction vector and trace it, multiply the color
+      // Refraction
       Vec3d mat_refract = m.kt(i);
       if (!mat_refract.iszero()) {
-        double n = m.index(i);
         if (dot != 0) {
-          Vec3d N = normal;
+          double refraction_index = m.index(i);
+          Vec3d normal_i = normal;
           // Reverse if we're going into the material
           if (dot > 0) {
-            N *= -1.0;
-            n = 1.0 / n;
+            normal_i *= -1.0;
+            refraction_index = 1.0 / refraction_index;
           }
 
           // Calculate cosines according to the angle
-          float cos_i = N * dir;
-          double cos_t2 = 1.0 - n*n * (1.0 - cos_i*cos_i);
+          float cos_i = normal_i * dir;
+          double cos_t2 = 1.0 - refraction_index*refraction_index * (1.0 - cos_i*cos_i);
+
+          // Make sure we have a valid transmission angle
           if (cos_t2 >= 0) {
             double cos_t = sqrt(cos_t2);
-            Vec3d T = (n * cos_i - cos_t) * N - n * dir;
-            ray refract_ray(new_pos, T);
+            Vec3d refract_dir = (refraction_index * cos_i - cos_t) * normal_i - refraction_index * dir;
+            ray refract_ray(new_pos, refract_dir, ray::REFRACTION);
             Vec3d refract_color = traceRay(refract_ray, thresh, depth + 1);
 
             final_color += prod(mat_refract, refract_color);
