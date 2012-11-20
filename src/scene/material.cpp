@@ -18,9 +18,6 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     // somewhere in your code in order to compute shadows and light falloff.
 
   // TODO Still have to do shadows
-	if( debugMode )
-		std::cout << "Debugging Phong code..." << std::endl;
-
 	Vec3d diff_color = kd(i);
 
 	//  Set up a few vectors (and a double) to be reused for each light
