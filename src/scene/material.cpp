@@ -12,17 +12,12 @@ extern bool debugMode;
 // the color of that point.
 Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
-	// YOUR CODE HERE
-
-	// For now, this method just returns the diffuse color of the object.
-	// This gives a single matte color for every distinct surface in the
-	// scene, and that's it.  Simple, but enough to get you started.
-	// (It's also inconsistent with the phong model...)
-
 	// Your mission is to fill in this method with the rest of the phong
 	// shading model, including the contributions of all the light sources.
     // You will need to call both distanceAttenuation() and shadowAttenuation()
     // somewhere in your code in order to compute shadows and light falloff.
+
+  // TODO Still have to do shadows
 	if( debugMode )
 		std::cout << "Debugging Phong code..." << std::endl;
 
@@ -37,16 +32,18 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// Loop through the lights and add their contribution
 	for (vector<Light*>::const_iterator litr = scene->beginLights();
 	     litr != scene->endLights(); ++litr) {
+	  // Get values for the light
 	  Light* pLight = *litr;
 	  light_color = pLight->getColor(diff_color);
 	  light_dir = pLight->getDirection(diff_color);
 
-	  diff_co = light_dir * i.N;
-	  light_color *= diff_co * pLight->distanceAttenuation(r.at(i.t));
+	  // Calculate the diffuse lighting term
+	  diff_co = (light_dir * i.N) * pLight->distanceAttenuation(r.at(i.t));
+	  light_color *= diff_co;
 
-	  final_color += Vec3d(diff_color[0] * light_color[0],
-	                         diff_color[1] * light_color[1],
-	                         diff_color[2] * light_color[2]);
+	  // Add the diffuse lighting contribution from this light to the
+	  // final color result
+	  final_color += prod(diff_color, light_color);
 	}
 
 	return final_color;

@@ -61,11 +61,29 @@ Vec3d RayTracer::traceRay( const ray& r, const Vec3d& thresh, int depth )
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
 
-		const Material& m = i.getMaterial();
+    const Material& m = i.getMaterial();
+	  Vec3d final_color = m.shade(scene, r, i);
 
-		return m.shade(scene, r, i);
+	  // Get reflected and refracted color by tracing new rays
+	  if (depth < 16) {
+	    // Set up our reflection vector and trace it to determine the
+	    // color contribution of reflection
+	    Vec3d new_pos = r.at(i.t);
+	    Vec3d dir = r.getDirection();
+	    Vec3d normal = i.N;
+	    dir.normalize();
+	    normal.normalize();
+	    Vec3d new_dir = -2.0 * (dir * normal) * normal + dir;
+	    ray new_ray(new_pos, new_dir);
 
-	
+	    Vec3d mat_r = m.kr(i);
+	    Vec3d r_color = traceRay(new_ray, thresh, depth + 1);
+	    final_color += prod(mat_r, r_color);
+
+	    // Next up is refraction
+	  }
+
+		return final_color;
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
