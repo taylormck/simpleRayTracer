@@ -77,7 +77,7 @@ protected:
 	Vec3d position;
 
 	// These three values are the a, b, and c in the distance
-	// attenuation function (from the slide labelled 
+	// attenuation function (from the slide labeled
 	// "Intensity drop-off with distance"):
 	//    f(d) = min( 1, 1/( a + b d + c d^2 ) )
 	float constantTerm;		// a

@@ -25,7 +25,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
   Vec3d light_color;
   Vec3d light_dir;
   Vec3d isect_point = r.at(i.t);
-  bool in_shadow;
+  Vec3d shadow_att;
   double diff_co;
 
   // Loop through the lights and add their contribution
@@ -35,17 +35,13 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     Light* pLight = *litr;
     light_dir = pLight->getDirection(isect_point);
 
-    // Shadows
-    in_shadow = false;
-    isect occluder;
-    ray feeler (isect_point, light_dir, ray::SHADOW);
-    if (scene->intersect(feeler, occluder)) {
-      in_shadow = true;
-    }
+    // Check for shadows
+    shadow_att = pLight->shadowAttenuation(isect_point);
 
-    if (!in_shadow) {
+    if (!shadow_att.iszero()) {
       // If not in shadow, do diffuse lighting
       light_color = pLight->getColor(diff_color);
+      light_color = prod(light_color, shadow_att);
 
       // Calculate the diffuse lighting term
       diff_co = (light_dir * i.N) * pLight->distanceAttenuation(isect_point);
