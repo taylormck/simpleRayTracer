@@ -42,7 +42,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	  light_dir = pLight->getDirection(diff_color);
 
 	  diff_co = light_dir * i.N;
-	  light_color *= diff_co * pLight->distanceAttenuation(i.t);
+	  light_color *= diff_co * pLight->distanceAttenuation(r.at(i.t));
 
 	  final_color += Vec3d(diff_color[0] * light_color[0],
 	                         diff_color[1] * light_color[1],
@@ -50,7 +50,6 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	}
 
 	return final_color;
-
 }
 
 TextureMap::TextureMap( string filename ) {

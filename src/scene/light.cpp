@@ -35,7 +35,10 @@ Vec3d DirectionalLight::getDirection( const Vec3d& P ) const
 
 double PointLight::distanceAttenuation( const Vec3d& P ) const {
   double distance = (position - P).length();
-  return 1.0 / (constantTerm + linearTerm * distance + quadraticTerm * distance * distance);
+  return min(1.0, max(0.0,  // Clamps the value to [0, 1]
+         1.0 / (constantTerm
+             + linearTerm * distance
+             + quadraticTerm * distance * distance)));
 }
 
 Vec3d PointLight::getColor( const Vec3d& P ) const
