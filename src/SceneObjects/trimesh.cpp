@@ -2,6 +2,8 @@
 #include <float.h>
 #include "trimesh.h"
 
+extern bool debugMode;
+
 using namespace std;
 
 Trimesh::~Trimesh()
@@ -88,61 +90,21 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   // Try to rule out most of these things quickly
   // While not really a spacial data structure, these rule outs
   // cause a significant speed up
-  if (d[0] < 0) {
-    double min_x = min(a[0], min(b[0], c[0]));
-    if (p0[0] < min_x)
+  Vec3d min = localbounds.getMin();
+  Vec3d max = localbounds.getMax();
+  for (int j = 2; j >= 0; --j) {
+    if ((p0[j] < min[j] && d[j] <= 0) || (p0[j] > max[j] && d[j] >= 0)) {
       return false;
-  } else if( d[0] > 0) {
-    double max_x = max(a[0], max(b[0], c[0]));
-    if (p0[0] > max_x)
-      return false;
-  } else {  // p0[0] == 0
-    double min_x = min(a[0], min(b[0], c[0]));
-    double max_x = max(a[0], max(b[0], c[0]));
-    if (p0[0] > max_x || p0[0] < min_x)
-      return false;
+    }
   }
 
-  // Repeat for y and z
-  if (d[1] < 0) {
-    double min_y = min(a[1], min(b[1], c[1]));
-    if (p0[1] < min_y)
-      return false;
-  } else if( d[1] > 0) {
-    double max_y = max(a[1], max(b[1], c[1]));
-    if (p0[1] > max_y)
-      return false;
-  } else {
-    double min_y = min(a[1], min(b[1], c[1]));
-    double max_y = max(a[1], max(b[1], c[1]));
-    if (p0[1] > max_y || p0[1] < min_y)
-      return false;
-  }
-
-  if (d[2] < 0) {
-    double min_z = min(a[2], min(b[2], c[2]));
-    if (p0[2] < min_z)
-      return false;
-  } else if( d[2] > 0) {
-    double max_z = max(a[2], max(b[2], c[2]));
-    if (p0[2] > max_z)
-      return false;
-  } else {
-    double min_z = min(a[2], min(b[2], c[2]));
-    double max_z = max(a[2], max(b[2], c[2]));
-    if (p0[2] > max_z || p0[2] < min_z)
-      return false;
-  }
-
-  // Find plane
-  Vec3d v0 = b - a;
-  Vec3d v1 = c - a;
+  // The normal was derived during the constructor
 
   // Find t
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON)
+  if (t < RAY_EPSILON || t < i.t)
     return false;
 
   // Find p
@@ -152,6 +114,8 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   // Formula found online at
   // http://gamedev.stackexchange.com/questions/23743/
   // whats-the-most-efficient-way-to-find-barycentric-coordinates
+  Vec3d v0 = b - a;
+  Vec3d v1 = c - a;
   Vec3d v2 = p - a;
   double lambda_0, lambda_1, lambda_2;
   double d00 = v0 * v0;
@@ -186,6 +150,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   i.setN(n);
 
   if (parent->vertNorms) {  // Per vertex material
+    if (debugMode) cout << "Using interpolated material." << endl;
     Material m;
     Material m0 = *parent->materials[ids[0]];
     Material m1 = *parent->materials[ids[1]];
@@ -195,12 +160,13 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     m += lambda_2 * m2;
     i.setMaterial(m);
   } else if (material != NULL) {  // Per face material
+    if (debugMode) cout << "Using face's material" << endl;
     i.setMaterial(*material);
   } else {  // Scene material ?
+    if (debugMode) cout << "Using scene material" << endl;
     // If we get here, the material had better be set in the scene
-    i.setMaterial(*parent->material);
+//    i.setMaterial();
   }
-
 
   return true;
 }
