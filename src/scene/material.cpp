@@ -12,16 +12,14 @@ extern bool debugMode;
 // the color of that point.
 Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
-  // Your mission is to fill in this method with the rest of the phong
-  // shading model, including the contributions of all the light sources.
-  // You will need to call both distanceAttenuation() and shadowAttenuation()
-  // somewhere in your code in order to compute shadows and light falloff.
-
-  // TODO Still have to do shadows
+  Vec3d final_color = scene->ambient() + ka(i);
   Vec3d diff_color = kd(i);
+  Vec3d spec_color = ks(i);
+  double shininess = shininess;
+
+  if (debugMode) cout << "kd: " << diff_color << endl;
 
   //  Set up a few vectors (and a double) to be reused for each light
-  Vec3d final_color = scene->ambient();
   Vec3d light_color;
   Vec3d light_dir;
   Vec3d isect_point = r.at(i.t);
@@ -37,9 +35,10 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
     // Check for shadows
     shadow_att = pLight->shadowAttenuation(isect_point);
+    if (debugMode) cout << "shadow: " << shadow_att << endl;
 
     if (!shadow_att.iszero()) {
-      // If not in shadow, do diffuse lighting
+      // If not in shadow, do lighting
       light_color = pLight->getColor(diff_color);
       light_color = prod(light_color, shadow_att);
 

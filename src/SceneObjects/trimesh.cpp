@@ -82,16 +82,68 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   const Vec3d& b = parent->vertices[ids[1]];
   const Vec3d& c = parent->vertices[ids[2]];
 
-  // YOUR CODE HERE
-  //  // Find plane
+  Vec3d p0 = r.at(0);
+  Vec3d d = r.getDirection();
+
+  // Try to rule out most of these things quickly
+  // While not really a spacial data structure, these rule outs
+  // cause a significant speed up
+  if (d[0] < 0) {
+    double min_x = min(a[0], min(b[0], c[0]));
+    if (p0[0] < min_x)
+      return false;
+  } else if( d[0] > 0) {
+    double max_x = max(a[0], max(b[0], c[0]));
+    if (p0[0] > max_x)
+      return false;
+  } else {  // p0[0] == 0
+    double min_x = min(a[0], min(b[0], c[0]));
+    double max_x = max(a[0], max(b[0], c[0]));
+    if (p0[0] > max_x || p0[0] < min_x)
+      return false;
+  }
+
+  // Repeat for y and z
+  if (d[1] < 0) {
+    double min_y = min(a[1], min(b[1], c[1]));
+    if (p0[1] < min_y)
+      return false;
+  } else if( d[1] > 0) {
+    double max_y = max(a[1], max(b[1], c[1]));
+    if (p0[1] > max_y)
+      return false;
+  } else {
+    double min_y = min(a[1], min(b[1], c[1]));
+    double max_y = max(a[1], max(b[1], c[1]));
+    if (p0[1] > max_y || p0[1] < min_y)
+      return false;
+  }
+
+  if (d[2] < 0) {
+    double min_z = min(a[2], min(b[2], c[2]));
+    if (p0[2] < min_z)
+      return false;
+  } else if( d[2] > 0) {
+    double max_z = max(a[2], max(b[2], c[2]));
+    if (p0[2] > max_z)
+      return false;
+  } else {
+    double min_z = min(a[2], min(b[2], c[2]));
+    double max_z = max(a[2], max(b[2], c[2]));
+    if (p0[2] > max_z || p0[2] < min_z)
+      return false;
+  }
+
+  // Find plane
   Vec3d v0 = b - a;
   Vec3d v1 = c - a;
 
   // Find t
-  Vec3d p0 = r.at(0);
-  Vec3d d = r.getDirection();
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
+
+  if (t < RAY_EPSILON)
+    return false;
 
   // Find p
   Vec3d p = r.at(t);

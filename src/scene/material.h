@@ -220,8 +220,7 @@ public:
     void setDiffuse( const Vec3d& kd )      { _kd.setValue( kd ); }
     void setReflective( const Vec3d& kr )   { _kr.setValue( kr ); }
     void setTransmissive( const Vec3d& kt ) { _kt.setValue( kt ); }
-    void setShininess( double shininess )   
-                                            { _shininess.setValue( shininess ); }
+    void setShininess( double shininess )   { _shininess.setValue( shininess ); }
     void setIndex( double index )           { _index.setValue( index ); }
 
 
