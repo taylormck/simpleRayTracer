@@ -14,8 +14,6 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
   Vec3d final_color = scene->ambient() + ka(i);
   Vec3d diff_color = kd(i);
-  Vec3d spec_color = ks(i);
-  double shininess = shininess;
 
   if (debugMode) cout << "kd: " << diff_color << endl;
 
@@ -38,7 +36,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     if (debugMode) cout << "shadow: " << shadow_att << endl;
 
     if (!shadow_att.iszero()) {
-      // If not in shadow, do lighting
+      // If not in shadow, do diffuse lighting
       light_color = pLight->getColor(diff_color);
       light_color = prod(light_color, shadow_att);
 
