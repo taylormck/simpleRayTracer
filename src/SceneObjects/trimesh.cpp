@@ -98,13 +98,11 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     }
   }
 
-  // The normal was derived during the constructor
-
   // Find t
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON)
+  if (t < RAY_EPSILON || (i.t != 0 && t > i.t))
     return false;
 
   // Find p
@@ -117,55 +115,57 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   Vec3d v0 = b - a;
   Vec3d v1 = c - a;
   Vec3d v2 = p - a;
-  double lambda_0, lambda_1, lambda_2;
+  double b0, b1, b2;
   double d00 = v0 * v0;
   double d01 = v0 * v1;
   double d11 = v1 * v1;
   double d20 = v2 * v0;
   double d21 = v2 * v1;
   double denom = d00 * d11 - d01 * d01;
-  lambda_0 = (d11 * d20 - d01 * d21) / denom;
-  if (lambda_0 < 0)
+  b0 = (d11 * d20 - d01 * d21) / denom;
+  if (b0 < 0)
     return false;
-  lambda_1 = (d00 * d21 - d01 * d20) / denom;
-  if (lambda_1 < 0)
+  b1 = (d00 * d21 - d01 * d20) / denom;
+  if (b1 < 0)
     return false;
-  lambda_2 = 1.0 - lambda_0 - lambda_1;
-  if (lambda_2 < 0)
+  b2 = 1.0 - (b0 + b1);
+  if (b2 < 0)
     return false;
 
   // If we reach this point, we have an intersection
-  i.setBary(lambda_0, lambda_1, lambda_2);
+  i.setBary(b0, b1, b2);
   i.setT(t);
   i.setObject(this);
 
   // Set the normal
   if (parent->normals.size() > 0) {
-    Vec3d n0 = parent->normals[ids[0]] * lambda_0;
-    Vec3d n1 = parent->normals[ids[1]] * lambda_1;
-    Vec3d n2 = parent->normals[ids[2]] * lambda_2;
+    Vec3d n0 = parent->normals[ids[0]] * b0;
+    Vec3d n1 = parent->normals[ids[1]] * b1;
+    Vec3d n2 = parent->normals[ids[2]] * b2;
     Vec3d n = n0 + n1 + n2;
     n.normalize();
+
+    if (debugMode) cout << "n: " << n << endl
+                        << "i.N" << i.N << endl
+                        << "n0: " << n0 << endl
+                        << "n1: " << n1 << endl
+                        << "n2: " << n2 << endl;
+
     i.setN(n);
   } else {
     i.setN(normal);
   }
 
   if (parent->materials.size() > 0) {  // Per vertex material
-    if (debugMode) cout << "Using interpolated material." << endl;
-    Material m;
-    Material m0 = *parent->materials[ids[0]];
-    Material m1 = *parent->materials[ids[1]];
-    Material m2 = *parent->materials[ids[2]];
-    m = lambda_0 * m0;
-    m += lambda_1 * m1;
-    m += lambda_2 * m2;
-    i.setMaterial(m);
+    Material m0 = b0 * (*parent->materials[ids[0]]);
+    Material m1 = b1 * (*parent->materials[ids[1]]);
+    Material m2 = b2 * (*parent->materials[ids[2]]);
+    m0 += m1;
+    m0 += m2;
+    i.setMaterial(m0);
   } else if (material != NULL) {  // Per face material
-    if (debugMode) cout << "Using face's material" << endl;
     i.setMaterial(*material);
   } else {  // Scene material ?
-    if (debugMode) cout << "Using scene material" << endl;
     // If we get here, the material had better be set in the scene
     i.setMaterial(*parent->material);
   }

@@ -12,9 +12,9 @@ extern bool debugMode;
 // the color of that point.
 Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
-  Vec3d final_color = prod(scene->ambient(), ka(i));
-  Vec3d diff_color = kd(i);
-  Vec3d spec_color = ks(i);
+  Vec3d final_color = i.material->ke(i) + prod(scene->ambient(), i.material->ka(i));
+  Vec3d diff_color = i.material->kd(i);
+  Vec3d spec_color = i.material->ks(i);
   double shine = shininess(i);
 
   //  Set up a few vectors (and a double) to be reused for each light
@@ -48,8 +48,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         if (diff_co > 0) {
           light_color *= diff_co;
 
-          // Add the diffuse lighting contribution from this light to the
-          // final color result
+          // Add the diffuse lighting contribution
           final_color += prod(diff_color, light_color);
         }
       }
@@ -61,12 +60,12 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         light_ref.normalize();
         spec_co = pow(light_ref * view_dir, shine) * dist_atten;
 
-        if (spec_co > 0) {
+        if (spec_co > 0) {  // Specular lighting contribution
           light_color *= spec_co;
           final_color += prod(spec_color, light_color);
         }
       }
-    }
+    } else if (debugMode) cout << "In shadow" << endl;
   }
 
   return final_color;
