@@ -25,7 +25,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
   Vec3d light_ref;
   Vec3d view_dir = r.getDirection();
   view_dir.normalize();
-  double diff_co, spec_co;
+  double diff_co, spec_co, dist_atten;
 
   // Loop through the lights and add their contribution
   for (vector<Light*>::const_iterator litr = scene->beginLights();
@@ -39,12 +39,13 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
     if (!shadow_att.iszero()) {
       // If not in shadow, do diffuse lighting
+      dist_atten = pLight->distanceAttenuation(isect_point);
 
       if (!diff_color.iszero()) {
         // Calculate the diffuse lighting term
         light_color = pLight->getColor(isect_point);
-        diff_co = (light_dir * i.N) * pLight->distanceAttenuation(isect_point);
-        if (spec_co > 0) {
+        diff_co = (light_dir * i.N) * dist_atten;
+        if (diff_co > 0) {
           light_color *= diff_co;
 
           // Add the diffuse lighting contribution from this light to the
@@ -58,7 +59,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         light_color = pLight->getColor(isect_point);
         light_ref = -2.0 * (light_dir * i.N) * i.N + light_dir;
         light_ref.normalize();
-        spec_co = pow(light_ref * view_dir, shine);
+        spec_co = pow(light_ref * view_dir, shine) * dist_atten;
 
         if (spec_co > 0) {
           light_color *= spec_co;
