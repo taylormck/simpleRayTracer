@@ -104,7 +104,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if ((t < RAY_EPSILON) || (i.t != 0 && t > i.t))
+  if (t < RAY_EPSILON)
     return false;
 
   // Find p
@@ -139,17 +139,17 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   i.setT(t);
   i.setObject(this);
 
-  if (debugMode) cout << "vertNorms: " << parent->vertNorms << endl;
-
   // Set the normal
-  Vec3d n = normal;
   if (parent->normals.size() > 0) {
     Vec3d n0 = parent->normals[ids[0]] * lambda_0;
     Vec3d n1 = parent->normals[ids[1]] * lambda_1;
     Vec3d n2 = parent->normals[ids[2]] * lambda_2;
-    n = n0 + n1 + n2;
+    Vec3d n = n0 + n1 + n2;
+    n.normalize();
+    i.setN(n);
+  } else {
+    i.setN(normal);
   }
-  i.setN(n);
 
   if (parent->materials.size() > 0) {  // Per vertex material
     if (debugMode) cout << "Using interpolated material." << endl;
@@ -167,7 +167,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   } else {  // Scene material ?
     if (debugMode) cout << "Using scene material" << endl;
     // If we get here, the material had better be set in the scene
-//    i.setMaterial();
+    i.setMaterial(*parent->material);
   }
 
   return true;

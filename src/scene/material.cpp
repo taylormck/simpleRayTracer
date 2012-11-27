@@ -12,17 +12,20 @@ extern bool debugMode;
 // the color of that point.
 Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
-  Vec3d final_color = scene->ambient() + ka(i);
+  Vec3d final_color = prod(scene->ambient(), ka(i));
   Vec3d diff_color = kd(i);
-
-  if (debugMode) cout << "kd: " << diff_color << endl;
+  Vec3d spec_color = ks(i);
+  double shine = shininess(i);
 
   //  Set up a few vectors (and a double) to be reused for each light
   Vec3d light_color;
   Vec3d light_dir;
   Vec3d isect_point = r.at(i.t);
   Vec3d shadow_att;
-  double diff_co;
+  Vec3d light_ref;
+  Vec3d view_dir = r.getDirection();
+  view_dir.normalize();
+  double diff_co, spec_co;
 
   // Loop through the lights and add their contribution
   for (vector<Light*>::const_iterator litr = scene->beginLights();
@@ -33,20 +36,35 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
     // Check for shadows
     shadow_att = pLight->shadowAttenuation(isect_point);
-    if (debugMode) cout << "shadow: " << shadow_att << endl;
 
     if (!shadow_att.iszero()) {
       // If not in shadow, do diffuse lighting
-      light_color = pLight->getColor(diff_color);
-      light_color = prod(light_color, shadow_att);
 
-      // Calculate the diffuse lighting term
-      diff_co = (light_dir * i.N) * pLight->distanceAttenuation(isect_point);
-      light_color *= diff_co;
+      if (!diff_color.iszero()) {
+        // Calculate the diffuse lighting term
+        light_color = pLight->getColor(isect_point);
+        diff_co = (light_dir * i.N) * pLight->distanceAttenuation(isect_point);
+        if (spec_co > 0) {
+          light_color *= diff_co;
 
-      // Add the diffuse lighting contribution from this light to the
-      // final color result
-      final_color += prod(diff_color, light_color);
+          // Add the diffuse lighting contribution from this light to the
+          // final color result
+          final_color += prod(diff_color, light_color);
+        }
+      }
+
+      // Specular highlights
+      if (!spec_color.iszero()) {
+        light_color = pLight->getColor(isect_point);
+        light_ref = -2.0 * (light_dir * i.N) * i.N + light_dir;
+        light_ref.normalize();
+        spec_co = pow(light_ref * view_dir, shine);
+
+        if (spec_co > 0) {
+          light_color *= spec_co;
+          final_color += prod(spec_color, light_color);
+        }
+      }
     }
   }
 
