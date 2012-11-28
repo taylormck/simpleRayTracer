@@ -81,7 +81,7 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
 // Intersect ray r with the triangle abc.  If it hits returns true,
 // and puts the t parameter, barycentric coordinates, normal, object id,
 // and object material in the isect object
-bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
+bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double current_t) const
 {
   const Vec3d& a = parent->vertices[ids[0]];
   const Vec3d& b = parent->vertices[ids[1]];
@@ -105,7 +105,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON)
+  if (t < RAY_EPSILON || (have_one && t > current_t))
     return false;
 
   // Find p

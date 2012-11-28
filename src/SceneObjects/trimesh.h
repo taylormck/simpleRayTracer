@@ -124,7 +124,10 @@ public:
 	}
 
     bool intersect( const ray& r, isect& i ) const;
-    bool intersectLocal( const ray& r, isect& i ) const;
+    bool intersectLocal( const ray& r, isect& i ) const {
+      intersectLocal(r, i, false, 0);
+    }
+    bool intersectLocal(const ray& r, isect& i, bool have_one, double current_t) const;
 
     bool hasBoundingBoxCapability() const { return true; }
       
