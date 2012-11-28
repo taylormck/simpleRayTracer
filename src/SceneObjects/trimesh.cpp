@@ -60,6 +60,7 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
   double tmax = 0.0;
   typedef Faces::const_iterator iter;
   bool have_one = false;
+  iter f;
   for( iter j = faces.begin(); j != faces.end(); ++j ) {
     isect cur;
     if( (*j)->intersectLocal( r, cur ) )
@@ -68,10 +69,12 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
       {
         i = cur;
         have_one = true;
+        f = j;
       }
     }
   }
   if( !have_one ) i.setT(1000.0);
+  else (*f)->setupisect(r, i);
   return have_one;
 }
 
@@ -122,14 +125,14 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   double d20 = v2 * v0;
   double d21 = v2 * v1;
   double denom = d00 * d11 - d01 * d01;
-  b0 = (d11 * d20 - d01 * d21) / denom;
-  if (b0 < 0)
-    return false;
-  b1 = (d00 * d21 - d01 * d20) / denom;
+  b1 = (d11 * d20 - d01 * d21) / denom;
   if (b1 < 0)
     return false;
-  b2 = 1.0 - (b0 + b1);
+  b2 = (d00 * d21 - d01 * d20) / denom;
   if (b2 < 0)
+    return false;
+  b0 = 1.0 - (b1 + b2);
+  if (b0 < 0)
     return false;
 
   // If we reach this point, we have an intersection
@@ -137,6 +140,14 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   i.setT(t);
   i.setObject(this);
 
+  return true;
+}
+
+/**
+ * Putting these computations in a separate function means we only have to do
+ * them once, saving a ton of computation and speeding up the ray tracer
+ */
+void TrimeshFace::setupisect(const ray& r, isect& i) {
   // Set the normal
   if (parent->normals.size() > 0) {
     Vec3d n0 = parent->normals[ids[0]];
@@ -146,7 +157,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     n1.normalize();
     n2.normalize();
 
-    Vec3d n = b0 * n0 + b1 * n1 + b2 * n2;
+    Vec3d n = i.bary[0] * n0 + i.bary[1] * n1 + i.bary[2] * n2;
     n.normalize();
     i.setN(n);
   } else {
@@ -154,9 +165,9 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   }
 
   if (parent->materials.size() > 0) {  // Per vertex material
-    Material m0 = b0 * (*parent->materials[ids[0]]);
-    Material m1 = b1 * (*parent->materials[ids[1]]);
-    Material m2 = b2 * (*parent->materials[ids[2]]);
+    Material m0 = i.bary[0] * (*parent->materials[ids[0]]);
+    Material m1 = i.bary[1] * (*parent->materials[ids[1]]);
+    Material m2 = i.bary[2] * (*parent->materials[ids[2]]);
     m0 += m1;
     m0 += m2;
     i.setMaterial(m0);
@@ -166,8 +177,6 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     // If we get here, the material had better be set in the scene
     i.setMaterial(*parent->material);
   }
-
-  return true;
 }
 
 void Trimesh::generateNormals()
