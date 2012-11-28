@@ -115,16 +115,13 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   // Formula found online at
   // http://gamedev.stackexchange.com/questions/23743/
   // whats-the-most-efficient-way-to-find-barycentric-coordinates
-  Vec3d v0 = b - a;
-  Vec3d v1 = c - a;
+  //
+  // Note that a few values are saved so as to improve performance at the cost
+  // of a bit more memory.
   Vec3d v2 = p - a;
   double b0, b1, b2;
-  double d00 = v0 * v0;
-  double d01 = v0 * v1;
-  double d11 = v1 * v1;
   double d20 = v2 * v0;
   double d21 = v2 * v1;
-  double denom = d00 * d11 - d01 * d01;
   b1 = (d11 * d20 - d01 * d21) / denom;
   if (b1 < 0)
     return false;

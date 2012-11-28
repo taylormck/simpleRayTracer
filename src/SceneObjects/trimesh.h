@@ -80,6 +80,8 @@ class TrimeshFace : public MaterialSceneObject
     int ids[3];
     Vec3d normal;
     double dist;
+    Vec3d v0, v1;
+    double d00, d01, d11, denom;
 
 public:
     TrimeshFace( Scene *scene, Material *mat, Trimesh *parent, int a, int b, int c)
@@ -98,6 +100,14 @@ public:
 		Vec3d vab = (b_coords - a_coords);
 		Vec3d vac = (c_coords - a_coords);
 		Vec3d vcb = (b_coords - c_coords);
+
+		// Store these so we don't need to constantly recalculate them
+		v0 = vab;
+		v1 = vac;
+		d00 = v0 * v0;
+		d01 = v0 * v1;
+		d11 = v1 * v1;
+		denom = d00 * d11 - d01 * d01;
         
 		if (vab.iszero() || vac.iszero() || vcb.iszero()) degen = true;
 		else {
