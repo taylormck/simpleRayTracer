@@ -83,23 +83,16 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
 // and object material in the isect object
 bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double current_t) const
 {
+  double t0, t1;
+  if (hasBoundingBoxCapability() && localbounds.intersect(r, t0, t1))
+    return false;
+
   const Vec3d& a = parent->vertices[ids[0]];
   const Vec3d& b = parent->vertices[ids[1]];
   const Vec3d& c = parent->vertices[ids[2]];
 
   Vec3d p0 = r.at(0);
   Vec3d d = r.getDirection();
-
-  // Try to rule out most of these things quickly
-  // While not really a spacial data structure, these rule outs
-  // cause a significant speed up
-  Vec3d min = localbounds.getMin();
-  Vec3d max = localbounds.getMax();
-  for (int j = 2; j >= 0; --j) {
-    if ((p0[j] < min[j] && d[j] <= 0) || (p0[j] > max[j] && d[j] >= 0)) {
-      return false;
-    }
-  }
 
   // Find t
   double D = -1.0 * normal * a;

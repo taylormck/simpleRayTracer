@@ -8,15 +8,13 @@
 #ifndef OCTREE_H_
 #define OCTREE_H_
 
-//#include "./scene.h"
-class Geometry;
+#include "scene.h"
 
 #define MAX_OBJECTS 3
 #define MAX_DEPTH   20
 
 
 class OctreeNode {
-    Scene* scene;
     OctreeNode* parent;
     BoundingBox bb;
     OctreeNode* children[8];
@@ -26,8 +24,7 @@ class OctreeNode {
     std::vector<Geometry*>::iterator begin() { return objects.begin(); }
     std::vector<Geometry*>::iterator end() { return objects.end(); }
 
-    bool intersect(ray& r);
-    void intersectObjects(ray& r, std::vector<Geometry*>* obj_list);
+    bool intersect(const ray& r);
 
   public:
     OctreeNode(OctreeNode* _parent, BoundingBox _bb, int _depth, std::vector<Geometry*>* _objs);
@@ -35,6 +32,7 @@ class OctreeNode {
 
     void subdivide(std::vector<Geometry*>* _obs);
     bool isLeaf() { return leaf; }
+    void intersectObjects(const ray& r, std::vector<Geometry*>* obj_list);
 };
 
 
@@ -50,15 +48,9 @@ class Octree {
       }
     }
 
-    void build(std::vector<Geometry*>* objs, BoundingBox bb) {
-      root = new OctreeNode(0, bb, 0, objs);
-    }
+    void build(std::vector<Geometry*>* objs, BoundingBox bb);
 
-    std::vector<Geometry*> reducedObjectSet(ray& r) {
-      std::vector<Geometry*> result;
-      root->intersectObjects(r, &result);
-      return result;
-    }
+    std::vector<Geometry*> reducedObjectSet(const ray& r);
 };
 
 #endif /* OCTREE_H_ */
