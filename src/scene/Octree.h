@@ -26,6 +26,9 @@ class OctreeNode {
     std::vector<Geometry*>::iterator begin() { return objects.begin(); }
     std::vector<Geometry*>::iterator end() { return objects.end(); }
 
+    bool intersect(ray& r);
+    void intersectObjects(ray& r, std::vector<Geometry*>* obj_list);
+
   public:
     OctreeNode(OctreeNode* _parent, BoundingBox _bb, int _depth, std::vector<Geometry*>* _objs);
     ~OctreeNode();
@@ -49,6 +52,12 @@ class Octree {
 
     void build(std::vector<Geometry*>* objs, BoundingBox bb) {
       root = new OctreeNode(0, bb, 0, objs);
+    }
+
+    std::vector<Geometry*> reducedObjectSet(ray& r) {
+      std::vector<Geometry*> result;
+      root->intersectObjects(r, &result);
+      return result;
     }
 };
 

@@ -56,7 +56,35 @@ void OctreeNode::subdivide(std::vector<Geometry*>* _objs) {
       }
     }
   }
+}
 
+bool OctreeNode::intersect(ray& r) {
+  double t0, t1;
+  return bb.intersect(r, t0, t1);
+}
+
+void OctreeNode::intersectObjects(ray& r, std::vector<Geometry*>* obj_list) {
+  if (intersect(r)) {
+    if (leaf) {
+      bool copy = false;
+      int i_limit = objects.size();
+      for(int i = 0; i < i_limit; ++i) {
+        int j_limit = obj_list->size();
+        for(int j = 0; j < j_limit && !copy; ++j){
+          if ( objects[i] == obj_list[j])
+            copy = true;
+        }
+        if (!copy)
+          obj_list->push_back(objects[i]);
+      }
+    } else {
+      // Not a leaf, so we recurse
+      for (int i = 0; i < 8; ++i) {
+        if (children[i] != 0)
+          children[i]->intersectObjects(r, obj_list);
+      }
+    }
+  }
 }
 
 
