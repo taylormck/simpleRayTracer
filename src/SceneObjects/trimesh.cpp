@@ -102,7 +102,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON || (i.t != 0 && t > i.t))
+  if (t < RAY_EPSILON)
     return false;
 
   // Find p
@@ -139,18 +139,15 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
 
   // Set the normal
   if (parent->normals.size() > 0) {
-    Vec3d n0 = parent->normals[ids[0]] * b0;
-    Vec3d n1 = parent->normals[ids[1]] * b1;
-    Vec3d n2 = parent->normals[ids[2]] * b2;
-    Vec3d n = n0 + n1 + n2;
+    Vec3d n0 = parent->normals[ids[0]];
+    Vec3d n1 = parent->normals[ids[1]];
+    Vec3d n2 = parent->normals[ids[2]];
+    n0.normalize();
+    n1.normalize();
+    n2.normalize();
+
+    Vec3d n = b0 * n0 + b1 * n1 + b2 * n2;
     n.normalize();
-
-    if (debugMode) cout << "n: " << n << endl
-                        << "i.N" << i.N << endl
-                        << "n0: " << n0 << endl
-                        << "n1: " << n1 << endl
-                        << "n2: " << n2 << endl;
-
     i.setN(n);
   } else {
     i.setN(normal);

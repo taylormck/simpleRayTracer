@@ -12,9 +12,11 @@ extern bool debugMode;
 // the color of that point.
 Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
-  Vec3d final_color = i.material->ke(i) + prod(scene->ambient(), i.material->ka(i));
-  Vec3d diff_color = i.material->kd(i);
-  Vec3d spec_color = i.material->ks(i);
+  // Set emissive and ambient lighting
+  Vec3d final_color = ke(i) + prod(scene->ambient(), ka(i));
+
+  Vec3d diff_color = kd(i);
+  Vec3d spec_color = ks(i);
   double shine = shininess(i);
 
   //  Set up a few vectors (and a double) to be reused for each light
@@ -65,7 +67,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
           final_color += prod(spec_color, light_color);
         }
       }
-    } else if (debugMode) cout << "In shadow" << endl;
+    }
   }
 
   return final_color;
