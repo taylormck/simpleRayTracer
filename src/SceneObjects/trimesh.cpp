@@ -63,7 +63,7 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
   iter f;
   for( iter j = faces.begin(); j != faces.end(); ++j ) {
     isect cur;
-    if( (*j)->intersectLocal( r, cur ) )
+    if( (*j)->intersectLocal( r, cur , have_one, i.t) )
     {
       if( !have_one || (cur.t < i.t) )
       {
@@ -174,6 +174,8 @@ void TrimeshFace::setupisect(const ray& r, isect& i) {
     // If we get here, the material had better be set in the scene
     i.setMaterial(*parent->material);
   }
+
+  if (debugMode) cout << "material.kd(i): " << i.material->kd(i) << endl;
 }
 
 void Trimesh::generateNormals()
