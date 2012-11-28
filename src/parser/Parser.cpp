@@ -81,6 +81,8 @@ Scene* Parser::parseScene()
          throw SyntaxErrorException( "Expected: geometry, camera, or light information", _tokenizer );
     }
   }
+
+  scene->buildOctree();
 }
 
 void Parser::parseCamera( Scene* scene )

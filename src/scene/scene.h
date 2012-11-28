@@ -20,6 +20,7 @@
 #include "material.h"
 #include "camera.h"
 #include "bbox.h"
+#include "Octree.h"
 
 #include "../vecmath/vec.h"
 #include "../vecmath/mat.h"
@@ -261,12 +262,20 @@ public:
 
 	const BoundingBox& bounds() const { return sceneBounds; }
 
+	std::vector<Geometry*>* getObjects() { return &objects; }
+
+	void buildOctree() {
+	  octree->build(&objects, sceneBounds);
+	}
+	Octree* getOctree() { return octree; }
+
 private:
 	std::vector<Geometry*> objects;
 	std::vector<Geometry*> nonboundedobjects;
 	std::vector<Geometry*> boundedobjects;
 	std::vector<Light*> lights;
 	Camera camera;
+	Octree* octree;
 
 	// This is the total amount of ambient light in the scene
 	// (used as the I_a in the Phong shading model)
