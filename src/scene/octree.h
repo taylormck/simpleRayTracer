@@ -25,30 +25,28 @@ class OctreeNode {
     std::vector<Geometry*>::iterator end() { return objects.end(); }
 
     bool intersect(const ray& r);
+    bool contains(Geometry* g);
 
   public:
-    OctreeNode(OctreeNode* _parent, BoundingBox _bb, int _depth, std::vector<Geometry*>* _objs);
+    OctreeNode();
+    OctreeNode(OctreeNode* _parent, BoundingBox _bb, int _depth, std::vector<Geometry*> _objs);
     ~OctreeNode();
 
     void subdivide(std::vector<Geometry*>* _obs);
     bool isLeaf() { return leaf; }
-    void intersectObjects(const ray& r, std::vector<Geometry*>* obj_list);
+    void intersectObjects(const ray& r, std::vector<Geometry*> obj_list);
 };
 
 
 class Octree {
   private:
-    OctreeNode* root;
+    OctreeNode root;
 
   public:
-    Octree() {}
-    ~Octree() {
-      if (root != 0) {
-        delete root;
-      }
-    }
+    Octree();
+    ~Octree();
 
-    void build(std::vector<Geometry*>* objs, BoundingBox bb);
+    void build(std::vector<Geometry*> objs, BoundingBox bb);
 
     std::vector<Geometry*> reducedObjectSet(const ray& r);
 };
