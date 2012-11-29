@@ -54,9 +54,9 @@ bool Scene::intersect( const ray& r, isect& i ) const {
 	double tmax = 0.0;
 	bool have_one = false;
 	typedef vector<Geometry*>::const_iterator iter;
-  std::vector<Geometry*> objs = octree->reducedObjectSet(r);
-  for( iter j = objs.begin(); j != objs.end(); ++j ) {
-//	for( iter j = objects.begin(); j != objects.end(); ++j ) {
+//  std::vector<Geometry*> objs = octree->reducedObjectSet(r);
+//  for( iter j = objs.begin(); j != objs.end(); ++j ) {
+	for( iter j = objects.begin(); j != objects.end(); ++j ) {
 		isect cur;
 		if( (*j)->intersect( r, cur ) ) {
 			if( !have_one || (cur.t < i.t) ) {

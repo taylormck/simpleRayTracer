@@ -84,7 +84,7 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
 bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double current_t) const
 {
   double t0, t1;
-  if (hasBoundingBoxCapability() && localbounds.intersect(r, t0, t1))
+  if (hasBoundingBoxCapability() && !localbounds.intersect(r, t0, t1))
     return false;
 
   const Vec3d& a = parent->vertices[ids[0]];

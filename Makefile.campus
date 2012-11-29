@@ -47,3 +47,7 @@ clean:
 clean_all:
 	rm -f $(ALL.O) ray
 
+TURNIN_FILES = src/ Makfile.campus Makefile.* ray.* README.*
+
+turnin: clean
+	turnin --submit edwardsj project6 $(TURNIN_FILES)

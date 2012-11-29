@@ -11,24 +11,24 @@ OctreeNode::OctreeNode(OctreeNode* _parent, BoundingBox _bb, int _depth, std::ve
 /*: parent(_parent), bb(_bb), depth(_depth) */{
 
   // Set the children to null
-//  for(int i = 0; i < 8; ++i) {
-//    children[i] = NULL;
-//  }
-//
-//
-//  int i_limit = _objs->size();
-//  for (int i = 0; i < i_limit; ++i) {
-//    Geometry* g = _objs->at(i);
-//    if (bb.intersects(g->getBoundingBox())) {
-//      objects.push_back(g);
-//    }
-//  }
-//
-//  if (objects.size() > MAX_OBJECTS && depth <= MAX_DEPTH) {
-//    subdivide(&objects);
-//  } else {
-//    leaf = true;
-//  }
+  //  for(int i = 0; i < 8; ++i) {
+  //    children[i] = NULL;
+  //  }
+  //
+  //
+  //  int i_limit = _objs->size();
+  //  for (int i = 0; i < i_limit; ++i) {
+  //    Geometry* g = _objs->at(i);
+  //    if (bb.intersects(g->getBoundingBox())) {
+  //      objects.push_back(g);
+  //    }
+  //  }
+  //
+  //  if (objects.size() > MAX_OBJECTS && depth <= MAX_DEPTH) {
+  //    subdivide(&objects);
+  //  } else {
+  //    leaf = true;
+  //  }
 }
 
 OctreeNode::~OctreeNode() {
@@ -69,13 +69,15 @@ void OctreeNode::intersectObjects(const ray& r, std::vector<Geometry*>* obj_list
       bool copy = false;
       int i_limit = objects.size();
       for(int i = 0; i < i_limit; ++i) {
-        //        int j_limit = obj_list->size();
-        //        for(int j = 0; j < j_limit && !copy; ++j){
-        //          if ( objects[i] == obj_list[j])
-        //            copy = true;
-        //        }
-        //        if (!copy)
-        obj_list->push_back(objects[i]);
+
+        // Check to see if we already have this object included
+        int j_limit = obj_list->size();
+        for(int j = 0; j < j_limit && !copy; ++j){
+          if ( objects[i] == obj_list->at(i))
+            copy = true;
+        }
+        if (!copy)
+          obj_list->push_back(objects[i]);
       }
     } else {
       // Not a leaf, so we recurse
