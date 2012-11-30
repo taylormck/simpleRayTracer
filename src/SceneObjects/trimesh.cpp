@@ -104,6 +104,10 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   // Find p
   Vec3d p = r.at(t);
 
+  // Make sure p exists
+  if (isnan(p[0]) || isnan(p[1]) || isnan(p[2]))
+      return false;
+
   // Find barycentric coordinates
   // Formula found online at
   // http://gamedev.stackexchange.com/questions/23743/
