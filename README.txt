@@ -3,6 +3,7 @@ UT EID(s): tsm544
 UTCS ID(s): tsm544
 
 Comments:
+Have started an octree but haven't gotten it to work properly yet.
+It's disabled for now, and rendering happens as per the usual.
 
-Have started work on an octree to speed up rendering, though it's not finished yet.
-I'm disabling it for turnin for now.
+All the required bits appear to be working correctly, and I'm turning in as is.
