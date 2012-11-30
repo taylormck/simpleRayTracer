@@ -91,7 +91,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   const Vec3d& b = parent->vertices[ids[1]];
   const Vec3d& c = parent->vertices[ids[2]];
 
-  Vec3d p0 = r.at(0);
+  Vec3d p0 = r.getPosition();
   Vec3d d = r.getDirection();
 
   // Find t
@@ -101,7 +101,11 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   // Make sure t exists
   // If the ray is parallel to the plane and not in the plane,
   // t can be nan
-
+  // Make sure t is far enough away that we're not hitting
+  // the same polygon in shadow/reflect/refract rays
+  // If we've already found an intersection in our loop,
+  // compare this t against the previous find to avoid work
+  // if at all possible
   if (isnan(t) || t < RAY_EPSILON || (have_one && current_t < t))
     return false;
 
