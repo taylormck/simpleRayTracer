@@ -98,15 +98,15 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON || (have_one && current_t < t))
+  // Make sure t exists
+  // If the ray is parallel to the plane and not in the plane,
+  // t can be nan
+
+  if (isnan(t) || t < RAY_EPSILON || (have_one && current_t < t))
     return false;
 
   // Find p
   Vec3d p = r.at(t);
-
-  // Make sure p exists
-  if (isnan(p[0]) || isnan(p[1]) || isnan(p[2]))
-      return false;
 
   // Find barycentric coordinates
   // Formula found online at
@@ -128,11 +128,6 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   b0 = 1.0 - (b1 + b2);
   if (b0 < 0)
     return false;
-
-  if (isnan(b0) || isnan(b1) || isnan(b2)) {
-    if (debugMode) cout << "denom: " << denom << endl;
-    return false;
-  }
 
   // If we reach this point, we have an intersection
   i.setBary(b0, b1, b2);
