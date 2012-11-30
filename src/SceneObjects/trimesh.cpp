@@ -163,12 +163,15 @@ void TrimeshFace::setupisect(const ray& r, isect& i) {
     i.setMaterial(m0);
   } else if (material != NULL) {  // Per face material
     i.setMaterial(*material);
-  } else {  // Scene material ?
+  } else {
     // If we get here, the material had better be set in the scene
     i.setMaterial(*parent->material);
   }
 
-  if (debugMode) cout << "material.kd(i): " << i.material->kd(i) << endl;
+  if (debugMode) cout << "i.t: " << i.t << endl
+                      << "i.N: " << i.N << endl
+                      << "i.bary: " << i.bary << endl
+                      << "material.kd(i): " << i.material->kd(i) << endl;
 }
 
 void Trimesh::generateNormals()

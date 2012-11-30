@@ -15,7 +15,7 @@ using namespace std;
 template< typename T >
 auto_ptr<T> wrap_auto_ptr( T* pointer )
 {
-	return auto_ptr<T>( pointer );
+  return auto_ptr<T>( pointer );
 }
 
 Scene* Parser::parseScene()
@@ -28,7 +28,7 @@ Scene* Parser::parseScene()
   {
     ostringstream ost;
     ost << "SBT-raytracer version number " << versionNumber->value() << 
-      " too high; only able to parse v1.1 and below.";
+        " too high; only able to parse v1.1 and below.";
     throw ParserException( ost.str() );
   }
 
@@ -52,37 +52,36 @@ Scene* Parser::parseScene()
       case SCALE:
       case TRANSFORM:
       case LBRACE:
-         parseTransformableElement(scene, &scene->transformRoot, *mat);
-      break;
+        parseTransformableElement(scene, &scene->transformRoot, *mat);
+        break;
       case POINT_LIGHT:
-         scene->add( parsePointLight( scene ) );
-         break;
+        scene->add( parsePointLight( scene ) );
+        break;
       case DIRECTIONAL_LIGHT:
-         scene->add( parseDirectionalLight( scene ) );
-         break;
+        scene->add( parseDirectionalLight( scene ) );
+        break;
       case AMBIENT_LIGHT:
-         parseAmbientLight( scene );
-         break;
+        parseAmbientLight( scene );
+        break;
       case CAMERA:
-         parseCamera( scene );
-         break;
+        parseCamera( scene );
+        break;
       case MATERIAL:
-		 {
-           auto_ptr<Material> temp( parseMaterialExpression( scene, *mat ));
-		   mat = temp;
-		 }
-         break;
+      {
+        auto_ptr<Material> temp( parseMaterialExpression( scene, *mat ));
+        mat = temp;
+      }
+      break;
       case SEMICOLON:
-         _tokenizer.Read( SEMICOLON );
-         break;
+        _tokenizer.Read( SEMICOLON );
+        break;
       case EOFSYM:
-         return scene;
+        scene->buildOctree();
+        return scene;
       default:
-         throw SyntaxErrorException( "Expected: geometry, camera, or light information", _tokenizer );
+        throw SyntaxErrorException( "Expected: geometry, camera, or light information", _tokenizer );
     }
   }
-
-  scene->buildOctree();
 }
 
 void Parser::parseCamera( Scene* scene )
@@ -111,7 +110,7 @@ void Parser::parseCamera( Scene* scene )
       case QUATERNIAN:
         quaternian = parseVec4dExpression();
         scene->getCamera().setLook( 
-          quaternian[0], quaternian[1], quaternian[2], quaternian[3] );
+            quaternian[0], quaternian[1], quaternian[2], quaternian[3] );
         break;
 
       case ASPECTRATIO:
@@ -138,8 +137,8 @@ void Parser::parseCamera( Scene* scene )
         }
         else
         {
-           if( hasUpDir )
-              throw SyntaxErrorException( "Expected: 'viewdir'", _tokenizer );
+          if( hasUpDir )
+            throw SyntaxErrorException( "Expected: 'viewdir'", _tokenizer );
         }
         _tokenizer.Read( RBRACE );
         return;
@@ -152,27 +151,27 @@ void Parser::parseCamera( Scene* scene )
 
 void Parser::parseTransformableElement( Scene* scene, TransformNode* transform, const Material& mat )
 {
-    const Token* t = _tokenizer.Peek();
-    switch( t->kind() )
-    {
-      case SPHERE:
-      case BOX:
-      case SQUARE:
-      case CYLINDER:
-      case CONE:
-      case TRIMESH:
-      case TRANSLATE:
-      case ROTATE:
-      case SCALE:
-      case TRANSFORM:
-         parseGeometry(scene, transform, mat);
+  const Token* t = _tokenizer.Peek();
+  switch( t->kind() )
+  {
+    case SPHERE:
+    case BOX:
+    case SQUARE:
+    case CYLINDER:
+    case CONE:
+    case TRIMESH:
+    case TRANSLATE:
+    case ROTATE:
+    case SCALE:
+    case TRANSFORM:
+      parseGeometry(scene, transform, mat);
       break;
-      case LBRACE:
-         parseGroup(scene, transform, mat);
-         break;
-      default:
-         throw SyntaxErrorException( "Expected: transformable element", _tokenizer );
-    }
+    case LBRACE:
+      parseGroup(scene, transform, mat);
+      break;
+    default:
+      throw SyntaxErrorException( "Expected: transformable element", _tokenizer );
+  }
 }
 
 // parse a group of geometry, i.e., enclosed in {} blocks.
@@ -202,10 +201,10 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform, const Material& 
         _tokenizer.Read( RBRACE );
         return;
       case MATERIAL:
-		{
-          auto_ptr<Material> temp(parseMaterialExpression(scene, mat));
-          newMat = temp;
-		}
+      {
+        auto_ptr<Material> temp(parseMaterialExpression(scene, mat));
+        newMat = temp;
+      }
       default:
         throw SyntaxErrorException( "Expected: '}' or geometry", _tokenizer );
     }
@@ -267,7 +266,7 @@ void Parser::parseTranslate(Scene* scene, TransformNode* transform, const Materi
 
   // Parse child geometry
   parseTransformableElement( scene, 
-    transform->createChild( Mat4d::createTranslation( x, y, z ) ), mat );
+      transform->createChild( Mat4d::createTranslation( x, y, z ) ), mat );
 
   _tokenizer.Read( RPAREN );
   _tokenizer.CondRead(SEMICOLON);
@@ -290,7 +289,7 @@ void Parser::parseRotate(Scene* scene, TransformNode* transform, const Material&
 
   // Parse child geometry
   parseTransformableElement( scene, 
-    transform->createChild( Mat4d::createRotation( w, x, y, z ) ), mat );
+      transform->createChild( Mat4d::createRotation( w, x, y, z ) ), mat );
 
   _tokenizer.Read( RPAREN );
   _tokenizer.CondRead(SEMICOLON);
@@ -311,20 +310,20 @@ void Parser::parseScale(Scene* scene, TransformNode* transform, const Material& 
   const Token* next = _tokenizer.Peek();
   if( SCALAR == next->kind() )
   {
-     y = parseScalar();
-     _tokenizer.Read( COMMA );
-     z = parseScalar();
-     _tokenizer.Read( COMMA );
+    y = parseScalar();
+    _tokenizer.Read( COMMA );
+    z = parseScalar();
+    _tokenizer.Read( COMMA );
   }
   else
   {
-     y = x;
-     z = x;
+    y = x;
+    z = x;
   }
 
   // Parse child geometry
   parseTransformableElement( scene, 
-    transform->createChild( Mat4d::createScale( x, y, z ) ), mat );
+      transform->createChild( Mat4d::createScale( x, y, z ) ), mat );
 
   _tokenizer.Read( RPAREN );
   _tokenizer.CondRead(SEMICOLON);
@@ -348,7 +347,7 @@ void Parser::parseTransform(Scene* scene, TransformNode* transform, const Materi
   _tokenizer.Read( COMMA );
 
   parseTransformableElement( scene, 
-    transform->createChild( Mat4d(row1, row2, row3, row4) ), mat );
+      transform->createChild( Mat4d(row1, row2, row3, row4) ), mat );
 
   _tokenizer.Read( RPAREN );
   _tokenizer.CondRead(SEMICOLON);
@@ -385,7 +384,7 @@ void Parser::parseSphere(Scene* scene, TransformNode* transform, const Material&
         return;
       default:
         throw SyntaxErrorException( "Expected: sphere attributes", _tokenizer );
-        
+
     }
   }
 }
@@ -412,14 +411,14 @@ void Parser::parseBox(Scene* scene, TransformNode* transform, const Material& ma
         parseIdentExpression();
         break;
       case RBRACE:
-         _tokenizer.Read( RBRACE );
+        _tokenizer.Read( RBRACE );
         box = new Box(scene, newMat ? newMat : new Material(mat) );
         box->setTransform( transform );
         scene->add( box );
         return;
       default:
         throw SyntaxErrorException( "Expected: box attributes", _tokenizer );
-        
+
     }
   }
 }
@@ -446,14 +445,14 @@ void Parser::parseSquare(Scene* scene, TransformNode* transform, const Material&
         parseIdentExpression();
         break;
       case RBRACE:
-         _tokenizer.Read( RBRACE );
+        _tokenizer.Read( RBRACE );
         square = new Square(scene, newMat ? newMat : new Material(mat));
         square->setTransform( transform );
         scene->add( square );
         return;
       default:
         throw SyntaxErrorException( "Expected: square attributes", _tokenizer );
-        
+
     }
   }
 }
@@ -480,7 +479,7 @@ void Parser::parseCylinder(Scene* scene, TransformNode* transform, const Materia
         parseIdentExpression();
         break;
       case RBRACE:
-         _tokenizer.Read( RBRACE );
+        _tokenizer.Read( RBRACE );
         cylinder = new Cylinder(scene, newMat ? newMat : new Material(mat));
         cylinder->setTransform( transform );
         scene->add( cylinder );
@@ -516,8 +515,8 @@ void Parser::parseCone(Scene* scene, TransformNode* transform, const Material& m
         newMat = parseMaterialExpression( scene, mat );
         break;
       case NAME:
-         parseIdentExpression();
-         break;
+        parseIdentExpression();
+        break;
       case CAPPED:
         capped = parseBooleanExpression();
         break;
@@ -533,7 +532,7 @@ void Parser::parseCone(Scene* scene, TransformNode* transform, const Material& m
       case RBRACE:
         _tokenizer.Read( RBRACE );
         cone = new Cone( scene, newMat ? newMat : new Material(mat), 
-          height, bottomRadius, topRadius, capped );
+            height, bottomRadius, topRadius, capped );
         cone->setTransform( transform );
         scene->add( cone );
         return;
@@ -571,8 +570,8 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
         break;
 
       case NAME:
-         parseIdentExpression();
-         break;
+        parseIdentExpression();
+        break;
 
       case MATERIALS:
         _tokenizer.Read( MATERIALS );
@@ -583,11 +582,11 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
           tmesh->addMaterial( parseMaterial( scene, tmesh->getMaterial() ) );
           for( ;; )
           {
-             const Token* nextToken = _tokenizer.Peek();
-             if( RPAREN == nextToken->kind() )
-               break;
-             _tokenizer.Read( COMMA );
-             tmesh->addMaterial( parseMaterial( scene, tmesh->getMaterial() ) );
+            const Token* nextToken = _tokenizer.Peek();
+            if( RPAREN == nextToken->kind() )
+              break;
+            _tokenizer.Read( COMMA );
+            tmesh->addMaterial( parseMaterial( scene, tmesh->getMaterial() ) );
           }
         }
         _tokenizer.Read( RPAREN );
@@ -603,11 +602,11 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
           tmesh->addNormal( parseVec3d() );
           for( ;; )
           {
-             const Token* nextToken = _tokenizer.Peek();
-             if( RPAREN == nextToken->kind() )
-               break;
-             _tokenizer.Read( COMMA );
-             tmesh->addNormal( parseVec3d() );
+            const Token* nextToken = _tokenizer.Peek();
+            if( RPAREN == nextToken->kind() )
+              break;
+            _tokenizer.Read( COMMA );
+            tmesh->addNormal( parseVec3d() );
           }
         }
         _tokenizer.Read( RPAREN );
@@ -623,11 +622,11 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
           parseFaces( faces );
           for( ;; )
           {
-             const Token* nextToken = _tokenizer.Peek();
-             if( RPAREN == nextToken->kind() )
-               break;
-             _tokenizer.Read( COMMA );
-             parseFaces( faces );
+            const Token* nextToken = _tokenizer.Peek();
+            if( RPAREN == nextToken->kind() )
+              break;
+            _tokenizer.Read( COMMA );
+            parseFaces( faces );
           }
         }
         _tokenizer.Read( RPAREN );
@@ -643,11 +642,11 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
           tmesh->addVertex( parseVec3d() );
           for( ;; )
           {
-             const Token* nextToken = _tokenizer.Peek();
-             if( RPAREN == nextToken->kind() )
-               break;
-             _tokenizer.Read( COMMA );
-             tmesh->addVertex( parseVec3d() );
+            const Token* nextToken = _tokenizer.Peek();
+            if( RPAREN == nextToken->kind() )
+              break;
+            _tokenizer.Read( COMMA );
+            tmesh->addVertex( parseVec3d() );
           }
         }
         _tokenizer.Read( RPAREN );
@@ -667,7 +666,7 @@ void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material
           {
             ostringstream oss;
             oss << "Bad face in trimesh: (" << (*vitr)[0] << ", " << (*vitr)[1] << 
-              ", " << (*vitr)[2] << ")";
+                ", " << (*vitr)[2] << ")";
             throw ParserException( oss.str() );
           }
         }
@@ -695,7 +694,7 @@ void Parser::parseFaces( list< Vec3d >& faces )
   // triangulate here and now.  assume the poly is
   // concave and we can triangulate using an arbitrary fan
   if( points.size() < 3 )
-     throw SyntaxErrorException( "Faces must have at least 3 vertices.", _tokenizer );
+    throw SyntaxErrorException( "Faces must have at least 3 vertices.", _tokenizer );
 
   list<double>::const_iterator i = points.begin();
   double a = (*i++);
@@ -735,55 +734,55 @@ PointLight* Parser::parsePointLight( Scene* scene )
   float quadraticAttenuationCoefficient = 1.0f;
 
   bool hasPosition( false ), hasColor( false );
-  
+
   _tokenizer.Read( POINT_LIGHT );
   _tokenizer.Read( LBRACE );
 
   for( ;; )
   {
-     const Token* t = _tokenizer.Peek();
-     switch( t->kind() )
-     {
-       case POSITION:
-         if( hasPosition )
-           throw SyntaxErrorException( "Repeated 'position' attribute", _tokenizer );
-         position = parseVec3dExpression();
-         hasPosition = true;
-         break;
+    const Token* t = _tokenizer.Peek();
+    switch( t->kind() )
+    {
+      case POSITION:
+        if( hasPosition )
+          throw SyntaxErrorException( "Repeated 'position' attribute", _tokenizer );
+        position = parseVec3dExpression();
+        hasPosition = true;
+        break;
 
-       case COLOR:
-         if( hasColor )
-            throw SyntaxErrorException( "Repeated 'color' attribute", _tokenizer );
-         color = parseVec3dExpression();
-         hasColor = true;
-         break;
+      case COLOR:
+        if( hasColor )
+          throw SyntaxErrorException( "Repeated 'color' attribute", _tokenizer );
+        color = parseVec3dExpression();
+        hasColor = true;
+        break;
 
-       case CONSTANT_ATTENUATION_COEFF:
-         constantAttenuationCoefficient = parseScalarExpression();
-		 break;
+      case CONSTANT_ATTENUATION_COEFF:
+        constantAttenuationCoefficient = parseScalarExpression();
+        break;
 
-       case LINEAR_ATTENUATION_COEFF:
-         linearAttenuationCoefficient = parseScalarExpression();
-		 break;
-         
-       case QUADRATIC_ATTENUATION_COEFF:
-         quadraticAttenuationCoefficient = parseScalarExpression();
-		 break;
+      case LINEAR_ATTENUATION_COEFF:
+        linearAttenuationCoefficient = parseScalarExpression();
+        break;
 
-       case RBRACE:
-         if( !hasColor )
-           throw SyntaxErrorException( "Expected: 'color'", _tokenizer );
-         if( !hasPosition )
-           throw SyntaxErrorException( "Expected: 'position'", _tokenizer );
-         _tokenizer.Read( RBRACE );
-         return new PointLight( scene, position, color, constantAttenuationCoefficient, 
-           linearAttenuationCoefficient, quadraticAttenuationCoefficient );
+      case QUADRATIC_ATTENUATION_COEFF:
+        quadraticAttenuationCoefficient = parseScalarExpression();
+        break;
 
-        default:
-          throw SyntaxErrorException( 
-			  "expecting 'position' or 'color' attribute, or 'constant_attenuation_coeff', 'linear_attenuation_coeff', or 'quadratic_attenuation_coeff'", 
+      case RBRACE:
+        if( !hasColor )
+          throw SyntaxErrorException( "Expected: 'color'", _tokenizer );
+        if( !hasPosition )
+          throw SyntaxErrorException( "Expected: 'position'", _tokenizer );
+        _tokenizer.Read( RBRACE );
+        return new PointLight( scene, position, color, constantAttenuationCoefficient,
+            linearAttenuationCoefficient, quadraticAttenuationCoefficient );
+
+      default:
+        throw SyntaxErrorException(
+            "expecting 'position' or 'color' attribute, or 'constant_attenuation_coeff', 'linear_attenuation_coeff', or 'quadratic_attenuation_coeff'",
             _tokenizer );
-     }
+    }
   }
 }
 
@@ -799,35 +798,35 @@ DirectionalLight* Parser::parseDirectionalLight( Scene* scene )
 
   for( ;; )
   {
-     const Token* t = _tokenizer.Peek();
-     switch( t->kind() )
-     {
-       case DIRECTION:
-         if( hasDirection )
-           throw SyntaxErrorException( "Repeated 'direction' attribute", _tokenizer );
-         direction = parseVec3dExpression();
-         hasDirection = true;
-         break;
+    const Token* t = _tokenizer.Peek();
+    switch( t->kind() )
+    {
+      case DIRECTION:
+        if( hasDirection )
+          throw SyntaxErrorException( "Repeated 'direction' attribute", _tokenizer );
+        direction = parseVec3dExpression();
+        hasDirection = true;
+        break;
 
-       case COLOR:
-         if( hasColor )
-            throw SyntaxErrorException( "Repeated 'color' attribute", _tokenizer );
-         color = parseVec3dExpression();
-         hasColor = true;
-         break;
+      case COLOR:
+        if( hasColor )
+          throw SyntaxErrorException( "Repeated 'color' attribute", _tokenizer );
+        color = parseVec3dExpression();
+        hasColor = true;
+        break;
 
-        case RBRACE:
-          if( !hasColor )
-            throw SyntaxErrorException( "Expected: 'color'", _tokenizer );
-          if( !hasDirection )
-            throw SyntaxErrorException( "Expected: 'position'", _tokenizer );
-          _tokenizer.Read( RBRACE );
-          return new DirectionalLight( scene, direction, color );
+      case RBRACE:
+        if( !hasColor )
+          throw SyntaxErrorException( "Expected: 'color'", _tokenizer );
+        if( !hasDirection )
+          throw SyntaxErrorException( "Expected: 'position'", _tokenizer );
+        _tokenizer.Read( RBRACE );
+        return new DirectionalLight( scene, direction, color );
 
-        default:
-          throw SyntaxErrorException( "expecting 'position' or 'color' attribute", 
+      default:
+        throw SyntaxErrorException( "expecting 'position' or 'color' attribute",
             _tokenizer );
-     }
+    }
   }
 }
 
@@ -931,13 +930,13 @@ bool Parser::parseBoolean()
   const Token* next = _tokenizer.Peek();
   if( SYMTRUE == next->kind() )
   {
-     _tokenizer.Read(SYMTRUE);
-     return true;
+    _tokenizer.Read(SYMTRUE);
+    return true;
   }
   if( SYMFALSE == next->kind() )
   {
-     _tokenizer.Read(SYMFALSE);
-     return false;
+    _tokenizer.Read(SYMFALSE);
+    return false;
   }
   throw SyntaxErrorException( "Expected boolean", _tokenizer );
 }
@@ -953,8 +952,8 @@ Vec3d Parser::parseVec3d()
   _tokenizer.Read( RPAREN );
 
   return Vec3d( value1->value(), 
-    value2->value(), 
-    value3->value() );
+      value2->value(),
+      value3->value() );
 }
 
 Vec4d Parser::parseVec4d()
@@ -970,9 +969,9 @@ Vec4d Parser::parseVec4d()
   _tokenizer.Read( RPAREN );
 
   return Vec4d( value1->value(), 
-    value2->value(), 
-    value3->value(),
-    value4->value() );
+      value2->value(),
+      value3->value(),
+      value4->value() );
 }
 
 Material* Parser::parseMaterial( Scene* scene, const Material& parent )
@@ -980,7 +979,7 @@ Material* Parser::parseMaterial( Scene* scene, const Material& parent )
   const Token* tok = _tokenizer.Peek();
   if( IDENT == tok->kind() )
   {
-     return new Material(materials[ tok->ident() ]);
+    return new Material(materials[ tok->ident() ]);
   }
 
   _tokenizer.Read( LBRACE );
@@ -1034,28 +1033,28 @@ Material* Parser::parseMaterial( Scene* scene, const Material& parent )
         break;
 
       case NAME:
-         _tokenizer.Read(NAME);
-         name = (_tokenizer.Read(IDENT))->ident();
-         _tokenizer.Read( SEMICOLON );
-         break;
+        _tokenizer.Read(NAME);
+        name = (_tokenizer.Read(IDENT))->ident();
+        _tokenizer.Read( SEMICOLON );
+        break;
 
       case RBRACE:
         _tokenizer.Read( RBRACE );
         if( ! name.empty() )
         {
-           if( materials.find( name ) == materials.end() )
-              materials[ name ] = *mat;
-           else
-           {
-              ostringstream oss;
-              oss << "Redefinition of material '" << name << "'.";
-              throw SyntaxErrorException( oss.str(), _tokenizer );
-           }
+          if( materials.find( name ) == materials.end() )
+            materials[ name ] = *mat;
+          else
+          {
+            ostringstream oss;
+            oss << "Redefinition of material '" << name << "'.";
+            throw SyntaxErrorException( oss.str(), _tokenizer );
+          }
         }
         return mat;
 
       default:
-         throw SyntaxErrorException( "Expected: material attribute", _tokenizer );
+        throw SyntaxErrorException( "Expected: material attribute", _tokenizer );
 
     }
   }

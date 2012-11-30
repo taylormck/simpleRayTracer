@@ -232,7 +232,8 @@ class Scene {
 
     TransformRoot transformRoot;
 
-    Scene() : transformRoot(), objects(), lights() {}
+    Scene();
+
     virtual ~Scene();
 
     void add( Geometry* obj ) {
