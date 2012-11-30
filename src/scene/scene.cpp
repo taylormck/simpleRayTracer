@@ -5,7 +5,7 @@
 #include "light.h"
 #include "../ui/TraceUI.h"
 
-#define OCTREE_SUPPORTED true
+#define OCTREE_SUPPORTED false
 
 using namespace std;
 
@@ -101,7 +101,7 @@ TextureMap* Scene::getTexture( string name ) {
 }
 
 void Scene::buildOctree() {
-  if (OCTREE_SUPPORTED)
+  if (OCTREE_SUPPORTED) {
     octree->build(objects, sceneBounds);
+  }
 }
-

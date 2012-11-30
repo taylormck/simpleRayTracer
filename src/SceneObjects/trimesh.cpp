@@ -74,7 +74,7 @@ bool Trimesh::intersectLocal(const ray&r, isect&i) const
     }
   }
   if( !have_one ) i.setT(1000.0);
-  else (*f)->setupisect(r, i);
+  else (*f)->setupisect(i);
   return have_one;
 }
 
@@ -98,7 +98,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   double D = -1.0 * normal * a;
   double t = -1.0 * (normal * p0 + D) / (normal * d);
 
-  if (t < RAY_EPSILON || (have_one && t > current_t))
+  if (t < RAY_EPSILON || (have_one && current_t < t))
     return false;
 
   // Find p
@@ -125,6 +125,11 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   if (b0 < 0)
     return false;
 
+  if (isnan(b0) || isnan(b1) || isnan(b2)) {
+    if (debugMode) cout << "denom: " << denom << endl;
+    return false;
+  }
+
   // If we reach this point, we have an intersection
   i.setBary(b0, b1, b2);
   i.setT(t);
@@ -133,11 +138,17 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   return true;
 }
 
+template<class T>
+bool isnan(T f) {
+    T _nan = (T)1.0 / (T)0.0;
+    return 0 == memcmp((void*)&f, (void*)&_nan, sizeof(T));
+}
+
 /**
  * Putting these computations in a separate function means we only have to do
  * them once, saving a ton of computation and speeding up the ray tracer
  */
-void TrimeshFace::setupisect(const ray& r, isect& i) {
+void TrimeshFace::setupisect(isect& i) {
   // Set the normal
   if (parent->normals.size() > 0) {
     Vec3d n0 = parent->normals[ids[0]];

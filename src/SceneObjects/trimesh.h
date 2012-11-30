@@ -154,7 +154,7 @@ public:
 
     const BoundingBox& getBoundingBox() const { return localbounds; }
 
-    void setupisect(const ray& r, isect& i);
+    void setupisect(isect& i);
  };
 
 #endif // TRIMESH_H__

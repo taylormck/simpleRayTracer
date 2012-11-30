@@ -11,7 +11,7 @@
 OctreeNode::OctreeNode() {}  // Blank constructor
 
 OctreeNode::OctreeNode(std::vector<Geometry*>* _tree_objects, BoundingBox _bb, int _depth, std::vector<int> _objs)
-: tree_objects(_tree_objects), node_box(_bb), depth(_depth) {
+: tree_objects(_tree_objects), node_box(_bb), depth(_depth), children({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}) {
 
   // Set the children to null
   for(int i = 0; i < 8; ++i) {
@@ -49,10 +49,9 @@ bool OctreeNode::contains(int g) {
 }
 
 OctreeNode::~OctreeNode() {
-  if (!leaf) {
-    for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; ++i) {
+    if (children[i])
       delete children[i];
-    }
   }
 }
 
@@ -132,5 +131,3 @@ void Octree::build(std::vector<Geometry*> &objs, BoundingBox _bb) {
 }
 
 std::vector<Geometry*> Octree::getObjects() { return objects; }
-
-

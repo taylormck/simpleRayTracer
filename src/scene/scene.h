@@ -227,7 +227,6 @@ class Scene {
 
 
     void buildOctree();
-
     Octree* getOctree() { return octree; }
 
     TransformRoot transformRoot;

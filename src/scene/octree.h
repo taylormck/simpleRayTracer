@@ -3,6 +3,11 @@
  *
  *  Created on: Nov 28, 2012
  *      Author: taylormckinney
+ *
+ *      The octree has been put on hold for now.
+ *      This extra code shouldn't slow the renderer down at all when not using this,
+ *      and I can't keep it from segfault or get it to play nice with
+ *      Triangle Meshes
  */
 
 #ifndef OCTREE_H_
