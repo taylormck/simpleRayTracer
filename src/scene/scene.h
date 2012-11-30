@@ -228,8 +228,6 @@ class Scene {
 #ifdef OCTREE_SUPPORTED
   private:
     Octree* octree;
-  public:
-    void buildOctree();
 #endif
   public:
     typedef std::vector<Light*>::iterator	liter;
@@ -237,7 +235,7 @@ class Scene {
     typedef std::vector<Geometry*>::iterator giter;
     typedef std::vector<Geometry*>::const_iterator cgiter;
 
-
+    void buildOctree();
 
     TransformRoot transformRoot;
 
