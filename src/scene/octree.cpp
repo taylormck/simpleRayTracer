@@ -36,7 +36,16 @@ OctreeNode::OctreeNode(std::vector<Geometry*>* _tree_objects, BoundingBox _bb, i
 }
 
 bool OctreeNode::contains(int g) {
-  return true;
+  Geometry* geo =tree_objects->at(g);
+  if (geo->hasBoundingBoxCapability()) {
+    bool result = false;
+    geo->ComputeBoundingBox();
+    return geo->getBoundingBox().intersects(node_box);
+  } else {
+    // If the object doesn't support bounding boxes, it will
+    // have to be checked against every ray
+    return true;
+  }
 }
 
 OctreeNode::~OctreeNode() {

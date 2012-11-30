@@ -101,6 +101,7 @@ TextureMap* Scene::getTexture( string name ) {
 }
 
 void Scene::buildOctree() {
-  octree->build(objects, sceneBounds);
+  if (OCTREE_SUPPORTED)
+    octree->build(objects, sceneBounds);
 }
 

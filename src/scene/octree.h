@@ -9,7 +9,7 @@
 #define OCTREE_H_
 
 #define MAX_OBJECTS 3
-#define MAX_DEPTH   5
+#define MAX_DEPTH   10
 
 #include "scene.h"
 
