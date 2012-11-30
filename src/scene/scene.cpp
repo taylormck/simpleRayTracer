@@ -1,10 +1,12 @@
 #include <cmath>
 
-#include "octree.h"
 #include "scene.h"
 #include "light.h"
 #include "../ui/TraceUI.h"
 
+#ifdef OCTREE_SUPPORTED
+#include "octree.h"
+#endif
 
 using namespace std;
 
