@@ -79,7 +79,6 @@ class TrimeshFace : public MaterialSceneObject
     Trimesh *parent;
     int ids[3];
     Vec3d normal;
-    double dist;
     Vec3d v0, v1;
     double d00, d01, d11, denom;
 
@@ -97,24 +96,21 @@ public:
 		Vec3d b_coords = parent->vertices[b];
 		Vec3d c_coords = parent->vertices[c];
 
-		Vec3d vab = (b_coords - a_coords);
-		Vec3d vac = (c_coords - a_coords);
+		v0 = (b_coords - a_coords);
+		v1 = (c_coords - a_coords);
 		Vec3d vcb = (b_coords - c_coords);
 
 		// Store these so we don't need to constantly recalculate them
-		v0 = vab;
-		v1 = vac;
 		d00 = v0 * v0;
 		d01 = v0 * v1;
 		d11 = v1 * v1;
 		denom = d00 * d11 - d01 * d01;
         
-		if (vab.iszero() || vac.iszero() || vcb.iszero()) degen = true;
+		if (v0.iszero() || v1.iszero() || vcb.iszero()) degen = true;
 		else {
 			degen = false;
 			normal = ((b_coords - a_coords) ^ (c_coords - a_coords));
 			normal.normalize();
-			dist = normal * a_coords;
 		}
 		localbounds = ComputeLocalBoundingBox();
 		bounds = localbounds;

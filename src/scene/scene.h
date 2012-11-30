@@ -26,7 +26,15 @@
 
 class Light;
 class Scene;
+
+// Uncomment the following define to enable an octree
+// Do note that it's considered an incomplete feature,
+// and doesn't work fully properly
+// #define OCTREE_SUPPORTED
+
+#ifdef OCTREE_SUPPORTED
 class Octree;
+#endif
 
 class SceneElement {
 
@@ -217,8 +225,12 @@ class MaterialSceneObject : public SceneObject {
 };
 
 class Scene {
+#ifdef OCTREE_SUPPORTED
   private:
     Octree* octree;
+  public:
+    void buildOctree();
+#endif
   public:
     typedef std::vector<Light*>::iterator	liter;
     typedef std::vector<Light*>::const_iterator cliter;
@@ -226,8 +238,6 @@ class Scene {
     typedef std::vector<Geometry*>::const_iterator cgiter;
 
 
-    void buildOctree();
-    Octree* getOctree() { return octree; }
 
     TransformRoot transformRoot;
 

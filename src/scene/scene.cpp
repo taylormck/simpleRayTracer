@@ -5,7 +5,6 @@
 #include "light.h"
 #include "../ui/TraceUI.h"
 
-#define OCTREE_SUPPORTED false
 
 using namespace std;
 
@@ -42,7 +41,9 @@ bool Geometry::hasBoundingBoxCapability() const {
 
 
 Scene::Scene() : transformRoot(), objects(), lights() {
+#ifdef OCTREE_SUPPORTED
   octree = new Octree();
+#endif
 }
 
 Scene::~Scene() {
@@ -52,7 +53,9 @@ Scene::~Scene() {
   for( g = objects.begin(); g != objects.end(); ++g ) delete (*g);
   for( l = lights.begin(); l != lights.end(); ++l ) delete (*l);
   for( t = textureCache.begin(); t != textureCache.end(); t++ ) delete (*t).second;
+#ifdef OCTREE_SUPPORTED
   delete octree;
+#endif
 }
 
 // Get any intersection with an object.  Return information about the 
@@ -63,7 +66,7 @@ bool Scene::intersect( const ray& r, isect& i ) const {
   bool have_one = false;
   typedef vector<Geometry*>::const_iterator iter;
 
-  if (OCTREE_SUPPORTED) {
+#ifdef OCTREE_SUPPORTED
     vector<int> objs = octree->reducedObjectSet(r);
     int j_limit = objs.size();
     for(int j = 0; j < j_limit; ++j) {
@@ -75,7 +78,7 @@ bool Scene::intersect( const ray& r, isect& i ) const {
         }
       }
     }
-  } else {
+#else
     for( iter j = objects.begin(); j != objects.end(); ++j ) {
       isect cur;
       if( (*j)->intersect( r, cur ) ) {
@@ -85,7 +88,8 @@ bool Scene::intersect( const ray& r, isect& i ) const {
         }
       }
     }
-  }
+#endif
+
   if( !have_one ) i.setT(1000.0);
   // if debugging,
   intersectCache.push_back( std::make_pair(r,i) );
@@ -101,7 +105,7 @@ TextureMap* Scene::getTexture( string name ) {
 }
 
 void Scene::buildOctree() {
-  if (OCTREE_SUPPORTED) {
+#ifdef OCTREE_SUPPORTED
     octree->build(objects, sceneBounds);
-  }
+#endif
 }
