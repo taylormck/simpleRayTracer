@@ -87,16 +87,20 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   if (hasBoundingBoxCapability() && !localbounds.intersect(r, t0, t1))
     return false;
 
+  Vec3d d = r.getDirection();
+  double normal_dot_d = normal * d;
+  if (normal_dot_d == 0)
+    return false;
+
   const Vec3d& a = parent->vertices[ids[0]];
   const Vec3d& b = parent->vertices[ids[1]];
   const Vec3d& c = parent->vertices[ids[2]];
 
   Vec3d p0 = r.getPosition();
-  Vec3d d = r.getDirection();
 
   // Find t
   double D = -1.0 * normal * a;
-  double t = -1.0 * (normal * p0 + D) / (normal * d);
+  double t = -1.0 * (normal * p0 + D) / normal_dot_d;
 
   // Make sure t exists
   // If the ray is parallel to the plane and not in the plane,
@@ -106,7 +110,7 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   // If we've already found an intersection in our loop,
   // compare this t against the previous find to avoid work
   // if at all possible
-  if (isnan(t) || t < RAY_EPSILON || (have_one && current_t < t))
+  if (t < RAY_EPSILON || (have_one && current_t < t))
     return false;
 
   // Find p
@@ -139,12 +143,6 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i , bool have_one, double
   i.setObject(this);
 
   return true;
-}
-
-template<class T>
-bool isnan(T f) {
-    T _nan = (T)1.0 / (T)0.0;
-    return 0 == memcmp((void*)&f, (void*)&_nan, sizeof(T));
 }
 
 /**
