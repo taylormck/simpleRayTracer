@@ -47,7 +47,8 @@ clean:
 clean_all:
 	rm -f $(ALL.O) ray
 
-TURNIN_FILES = src Makefile.* ray.* README.*
+TURNIN_FILES = src Makefile.* ray.* README.* original.bmp
 
 turnin: clean
+	make -f Makefile.campus && ./ray -r 10 -w 512 original.ray original.bmp
 	turnin --submit edwardsj project6 $(TURNIN_FILES)
