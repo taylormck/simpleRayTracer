@@ -1,3 +1,0 @@
-#!/bin/bash
-make clean -f Makefile.campus
-make -f Makefile.campus && ./ray -r 0 -w 512 scenes/easy2.ray easy2.bmp
